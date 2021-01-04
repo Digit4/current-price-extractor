@@ -30,7 +30,7 @@ def getTickerData(exchange,ticker):
         return exc
     try:
         if(len(price_container)!=0):
-            return(price_container[0].text.split(" ")[0].replace(",",""))
+            return(price_container[0].text.split(" ")[0].replace(",","")+" "+str(response.status_code))
         else:
             return "-1"
     except Exception as exc:
