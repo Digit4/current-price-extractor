@@ -3,6 +3,7 @@
 .flaskenv
 *.pyc
 *.pyo
+venv/
 env/
 env*
 dist/
@@ -22,3 +23,7 @@ htmlcov/
 .coverage
 .coverage.*
 *,cover
+
+#specific to cronjob
+price-script.log
+price-error.log
