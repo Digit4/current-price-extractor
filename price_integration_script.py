@@ -63,5 +63,6 @@ if __name__ == "__main__":
             f"https://mycycles.in/flask/{exchange}/{signal['company_name']}",
             signal["company_name"],
         )
-        store_prices(signal, price)
-        sleep(1)
+        if(price != "-1"):
+            store_prices(signal, price)
+        sleep(5)
