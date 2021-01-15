@@ -1,4 +1,5 @@
 from time import sleep
+from datetime import datetime
 import requests, json, sys
 
 
@@ -44,25 +45,38 @@ def store_prices(signal_dict, price):
     response = requests.post(url)
     if response.ok:
         updated_signal_dict = json.loads(response.text)["data"]["updatePrice"]
-        print(
-            f"Price updated to: {updated_signal_dict['price']} for: {updated_signal_dict['company_name']}"
-        )
+        try:
+            print(
+                f"[{datetime.now().isoformat(' ','seconds')}]Price updated to: {updated_signal_dict['price']} for: {updated_signal_dict['company_name']}"
+            )
+        except Exception as e:
+            print(f"Error occurred while printing:{e}")
     else:
-        print(response)
+        response.raise_for_status()
 
 
 if __name__ == "__main__":
     signals = Signals()
     exchange = 'BSE'
+    start_time = datetime.now()
+    print(f"[{start_time.isoformat(' ','seconds')}]Fetching all signals from DB")
     signals.fetch_signals(
         "https://mycycles.in/server/graphql?query=%7B%0A%09signals%7B%0A%20%20%20%20_id%0A%20%20%20%20company_name%0A%20%20%20%20%0A%20%20%7D%0A%7D"
     )
+    print(f"[{datetime.now().isoformat(' ','seconds')}]DB signals fetched")
     
     for signal in signals.data_list:
-        price = fetch_prices(
-            f"https://mycycles.in/flask/{exchange}/{signal['company_name']}",
-            signal["company_name"],
-        )
-        if(price != "-1"):
-            store_prices(signal, price)
-        sleep(5)
+        try:
+            price = fetch_prices(
+                f"https://mycycles.in/flask/{exchange}/{signal['company_name']}",
+                signal["company_name"],
+            )
+            try:
+                store_prices(signal, price)
+            except Exception as e:
+                print(f"[{datetime.now(' ','seconds')}]Error occurred while storing price for {signal}: {e}")
+        except Exception as e:
+            print(f"[{datetime.now(' ','seconds')}]Error occurred in fetching price for {signal}: {e}")
+        sleep(3)
+    end_time = datetime.now()
+    print(f"Finished script running successfully. Took {end_time-start_time}")
